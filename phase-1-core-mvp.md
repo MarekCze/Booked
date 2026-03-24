@@ -21,49 +21,49 @@
 
 ### 1.1 Project Scaffolding
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** None
 **Blockers:** None
 
-- [ ] **1.1.1** Initialise Turborepo monorepo with `apps/web` (Next.js 14+ App Router) and `packages/shared`
+- [x] **1.1.1** Initialise Turborepo monorepo with `apps/web` (Next.js 14+ App Router) and `packages/shared`
   - Run `npx create-turbo@latest`, add Next.js app with App Router, TypeScript strict mode
   - Configure `turbo.json` with `build`, `dev`, `lint` pipelines
   - Add `.nvmrc` pinning Node version
-- [ ] **1.1.2** Install and configure Tailwind CSS in `apps/web`
+- [x] **1.1.2** Install and configure Tailwind CSS in `apps/web`
   - Tailwind v3+, add `tailwind.config.ts` with theme extensions for brand colours
   - Set up `globals.css` with base layer resets
-- [ ] **1.1.3** Install Supabase client libraries
+- [x] **1.1.3** Install Supabase client libraries
   - `@supabase/supabase-js` and `@supabase/ssr` in `apps/web`
   - Create `lib/supabase/client.ts` (browser client) and `lib/supabase/server.ts` (server component / route handler client)
   - Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env.local`
-- [ ] **1.1.4** Install Supabase CLI locally and link to project
+- [x] **1.1.4** Install Supabase CLI locally and link to project
   - `npx supabase init` in repo root → creates `supabase/` directory
   - `npx supabase link --project-ref <ref>` to connect to remote project
-- [ ] **1.1.5** Create `packages/shared/types.ts` with initial TypeScript type stubs for Tenant, Specialist, Service, Slot, Booking
+- [x] **1.1.5** Create `packages/shared/types.ts` with initial TypeScript type stubs for Tenant, Specialist, Service, Slot, Booking
 
 ### 1.2 Database Schema & Migrations
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` In progress
 **Dependencies:** 1.1.4
 **Blockers:** None
 
-- [ ] **1.2.1** Write migration: `tenants` table
+- [x] **1.2.1** Write migration: `tenants` table
   - Columns: `id`, `slug` (unique), `name`, `timezone` (default `Europe/Dublin`), `currency` (default `EUR`), `stripe_account_id`, `settings` (jsonb), `created_at`
   - Add unique index on `slug`
-- [ ] **1.2.2** Write migration: `specialists` table
+- [x] **1.2.2** Write migration: `specialists` table
   - Columns: `id`, `tenant_id` (FK → tenants), `name`, `bio`, `photo_url`, `display_order`, `is_active`, `slots_generated_through` (date, nullable), `created_at`
-- [ ] **1.2.3** Write migration: `services` table
+- [x] **1.2.3** Write migration: `services` table
   - Columns: `id`, `tenant_id` (FK → tenants), `specialist_id` (FK → specialists, nullable for global services), `name`, `duration_min`, `price_cents`, `is_active`
-- [ ] **1.2.4** Write migration: `slots` table
+- [x] **1.2.4** Write migration: `slots` table
   - Columns: `id`, `tenant_id` (FK → tenants), `specialist_id` (FK → specialists), `starts_at`, `ends_at`, `status` (default `available`), `booking_id` (nullable), `held_until`, `created_at`
   - Unique constraint on `(specialist_id, starts_at)`
   - Partial index: `idx_slots_availability` on `(specialist_id, starts_at) WHERE status = 'available'`
-- [ ] **1.2.5** Write migration: `bookings` table
+- [x] **1.2.5** Write migration: `bookings` table
   - Columns: `id`, `tenant_id`, `specialist_id`, `service_id`, `starts_at`, `ends_at`, `slot_count`, `client_id` (FK → auth.users, nullable), `client_name`, `client_phone`, `status`, `payment_status`, `stripe_payment_intent_id`, `price_cents`, `notes`, `created_at`
   - Add deferred FK from `slots.booking_id` → `bookings.id` (ON DELETE SET NULL)
-- [ ] **1.2.6** Write migration: `schedule_templates` table
+- [x] **1.2.6** Write migration: `schedule_templates` table
   - Columns: `id`, `tenant_id`, `specialist_id`, `day_of_week` (0=Mon..6=Sun), `start_time`, `end_time`, `break_start`, `break_end`
-- [ ] **1.2.7** Write migration: `tenant_members` table
+- [x] **1.2.7** Write migration: `tenant_members` table
   - Columns: `id`, `tenant_id` (FK → tenants), `user_id` (FK → auth.users), `role` (default `staff`)
   - Unique constraint on `(tenant_id, user_id)`
 - [ ] **1.2.8** Run all migrations against Supabase project, verify with `supabase db diff`
@@ -71,48 +71,48 @@
 
 ### 1.3 Row-Level Security Policies
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` In progress
 **Dependencies:** 1.2.8
 **Blockers:** None
 
-- [ ] **1.3.1** Enable RLS on all tables (`alter table <name> enable row level security`)
-- [ ] **1.3.2** `tenants` — public SELECT by slug (for subdomain resolution), admin UPDATE for own tenant only
-- [ ] **1.3.3** `specialists` — public SELECT where `is_active = true`, admin ALL scoped via `tenant_members`
-- [ ] **1.3.4** `services` — public SELECT where `is_active = true`, admin ALL scoped via `tenant_members`
-- [ ] **1.3.5** `slots` — public SELECT (read availability), admin ALL scoped via `tenant_members`. Booking-flow UPDATEs handled by RPC functions running as `security definer`
-- [ ] **1.3.6** `bookings` — authenticated SELECT for own bookings (`client_id = auth.uid()`), admin SELECT/UPDATE scoped via `tenant_members`. INSERT via RPC function (security definer)
-- [ ] **1.3.7** `schedule_templates` — admin ALL scoped via `tenant_members`, no public access
-- [ ] **1.3.8** `tenant_members` — admin SELECT/INSERT/DELETE for own tenant, no public access
+- [x] **1.3.1** Enable RLS on all tables (`alter table <name> enable row level security`)
+- [x] **1.3.2** `tenants` — public SELECT by slug (for subdomain resolution), admin UPDATE for own tenant only
+- [x] **1.3.3** `specialists` — public SELECT where `is_active = true`, admin ALL scoped via `tenant_members`
+- [x] **1.3.4** `services` — public SELECT where `is_active = true`, admin ALL scoped via `tenant_members`
+- [x] **1.3.5** `slots` — public SELECT (read availability), admin ALL scoped via `tenant_members`. Booking-flow UPDATEs handled by RPC functions running as `security definer`
+- [x] **1.3.6** `bookings` — authenticated SELECT for own bookings (`client_id = auth.uid()`), admin SELECT/UPDATE scoped via `tenant_members`. INSERT via RPC function (security definer)
+- [x] **1.3.7** `schedule_templates` — admin ALL scoped via `tenant_members`, no public access
+- [x] **1.3.8** `tenant_members` — admin SELECT/INSERT/DELETE for own tenant, no public access
 - [ ] **1.3.9** Test all policies: verify a non-authenticated user can read specialists/services/slots but not bookings; verify cross-tenant isolation
 
 ### 1.4 Postgres RPC Functions
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` In progress
 **Dependencies:** 1.2.8
 **Blockers:** None
 
-- [ ] **1.4.1** Write `ensure_slots_exist(p_specialist_id uuid, p_from date, p_to date)` function
+- [x] **1.4.1** Write `ensure_slots_exist(p_specialist_id uuid, p_from date, p_to date)` function
   - Check `specialists.slots_generated_through` watermark
   - Read `schedule_templates` for the specialist
   - Generate 15-min slot rows for each day in the gap, skipping break periods
   - Update `slots_generated_through` to `p_to`
   - Run as `security definer` so public clients can trigger it
-- [ ] **1.4.2** Write `hold_slots(p_specialist_id uuid, p_starts_at timestamptz, p_slot_count int)` function
+- [x] **1.4.2** Write `hold_slots(p_specialist_id uuid, p_starts_at timestamptz, p_slot_count int)` function
   - Single transaction: SELECT N contiguous available slots with `FOR UPDATE SKIP LOCKED`
   - Verify count matches and slots are truly contiguous (no gaps)
   - SET `status = 'held'`, `held_until = now() + interval '5 minutes'`
   - Return array of slot IDs on success, raise exception on failure
   - Run as `security definer`
-- [ ] **1.4.3** Write `confirm_booking(p_slot_ids uuid[], p_specialist_id uuid, p_service_id uuid, p_client_id uuid, p_client_name text, p_client_phone text, p_price_cents int)` function
+- [x] **1.4.3** Write `confirm_booking(p_slot_ids uuid[], p_specialist_id uuid, p_service_id uuid, p_client_id uuid, p_client_name text, p_client_phone text, p_price_cents int)` function
   - Verify all slots are still `held` and belong to the caller (or match the hold)
   - INSERT into `bookings`, UPDATE slots to `status = 'booked'` with `booking_id`
   - Return booking ID
   - Run as `security definer`
-- [ ] **1.4.4** Write `cancel_booking(p_booking_id uuid)` function
+- [x] **1.4.4** Write `cancel_booking(p_booking_id uuid)` function
   - Set `bookings.status = 'cancelled'`
   - Set all associated `slots.status = 'available'`, clear `booking_id`
   - Run as `security definer`
-- [ ] **1.4.5** Write `get_available_start_times(p_specialist_id uuid, p_date date, p_slots_needed int)` function
+- [x] **1.4.5** Write `get_available_start_times(p_specialist_id uuid, p_date date, p_slots_needed int)` function
   - Uses window function to find all start times where N contiguous slots are available
   - Returns array of `timestamptz` values
   - Calls `ensure_slots_exist()` internally before querying
@@ -120,32 +120,32 @@
 
 ### 1.5 Seed Data
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` In progress
 **Dependencies:** 1.4.6
 **Blockers:** None
 
-- [ ] **1.5.1** Create `supabase/seed.sql` with one demo tenant (`slug: demo-barbers`)
-- [ ] **1.5.2** Seed 3 specialists with names, bios, placeholder photo URLs
-- [ ] **1.5.3** Seed 5–6 services (mix of 15, 30, 60, 90 min durations, various prices)
-- [ ] **1.5.4** Seed schedule templates (Mon–Sat, 09:00–17:30, 13:00–13:30 break)
-- [ ] **1.5.5** Seed one `tenant_members` row linking a test admin user
+- [x] **1.5.1** Create `supabase/seed.sql` with one demo tenant (`slug: demo-barbers`)
+- [x] **1.5.2** Seed 3 specialists with names, bios, placeholder photo URLs
+- [x] **1.5.3** Seed 5–6 services (mix of 15, 30, 60, 90 min durations, various prices)
+- [x] **1.5.4** Seed schedule templates (Mon–Sat, 09:00–17:30, 13:00–13:30 break)
+- [x] **1.5.5** Seed one `tenant_members` row linking a test admin user
 - [ ] **1.5.6** Verify seed by running `ensure_slots_exist()` for a specialist and confirming slots appear
 
 ### 1.6 Subdomain Tenant Resolution Middleware
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` In progress
 **Dependencies:** 1.1.3, 1.2.1
 **Blockers:** None
 
-- [ ] **1.6.1** Create `apps/web/middleware.ts`
+- [x] **1.6.1** Create `apps/web/middleware.ts`
   - Extract subdomain from `request.headers.get('host')` (handle `slug.clipbook.io` and `slug.localhost:3000`)
   - Query Supabase `tenants` table by `slug` (use service role key in middleware for unauthenticated reads, or rely on public RLS policy)
   - If tenant found: set `x-tenant-id` header and `tenant-slug` cookie on the request
   - If tenant not found: redirect to marketing site or 404 page
   - Skip middleware for `app.clipbook.io` (admin routes) and `www.clipbook.io` (marketing)
-- [ ] **1.6.2** Create `lib/tenant.ts` helper: `getTenantId()` reads from cookie/header in server components
+- [x] **1.6.2** Create `lib/tenant.ts` helper: `getTenantId()` reads from cookie/header in server components
 - [ ] **1.6.3** Test locally with `demo-barbers.localhost:3000` (Chrome supports subdomains on localhost natively)
-- [ ] **1.6.4** Add tenant-not-found fallback page (`apps/web/app/not-found.tsx`)
+- [x] **1.6.4** Add tenant-not-found fallback page (`apps/web/app/not-found.tsx`)
 
 ---
 
