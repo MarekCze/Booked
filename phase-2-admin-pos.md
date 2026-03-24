@@ -61,7 +61,12 @@
 - [ ] **5.2.4** Create `app/(admin)/specialists/new/page.tsx` — add specialist form
   - Same fields as edit, INSERT into `specialists`
   - Auto-set `display_order` to `max(display_order) + 1` for the tenant
-- [ ] **5.2.5** Add drag-to-reorder for display_order on the list view
+- [ ] **5.2.5** Portfolio image management on specialist edit form
+  - Upload multiple images to Supabase Storage
+  - Store URLs in `specialists.portfolio_images` JSONB array
+  - Add/remove/reorder portfolio images, optional captions
+  - Displayed on specialist profile page (`/specialists/[id]`)
+- [ ] **5.2.6** Add drag-to-reorder for display_order on the list view
   - Reorder → batch UPDATE `display_order` values
   - Use a simple sortable list (no heavy DnD library — `framer-motion` `Reorder` component)
 
@@ -119,15 +124,23 @@
 **Blockers:** None
 
 - [ ] **5.5.1** Create `app/(admin)/settings/page.tsx`
-  - Sections: Shop Details, Stripe, Branding
+  - Sections: Shop Details, Stripe, Branding, Website Content
 - [ ] **5.5.2** Shop details section: name, timezone (dropdown), currency (dropdown: EUR, GBP, USD)
   - Save → UPDATE `tenants` row
 - [ ] **5.5.3** Stripe section: show onboarding status (connected / not connected / restricted)
   - If not connected: "Connect Stripe" button → triggers onboarding flow from Phase 1 (3.2.2)
   - If connected: show account ID, link to Stripe dashboard, charges_enabled status
-- [ ] **5.5.4** Branding section (minimal for now): primary colour picker, logo upload to Supabase Storage
+- [ ] **5.5.4** Branding section: primary colour picker, logo upload to Supabase Storage
   - Store in `tenants.settings.branding` as JSON: `{ primary_color, logo_url }`
   - Applied in client-facing pages via CSS variables
+- [ ] **5.5.5** Website content management section:
+  - Homepage: title, subtitle, hero image upload, CTA text
+  - About: description (textarea)
+  - Gallery: image uploads (multiple), captions
+  - Contact: email, phone, address, map embed URL
+  - Social: Instagram, Facebook, TikTok URLs
+  - All stored in `tenants.settings` JSONB fields
+- [ ] **5.5.6** Review management: list all reviews, approve/reject toggle, delete
 
 ---
 

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /mnt/d/Projects/Servers/Booked/apps/web/.env*)",
+      "Read(//home/ubuntu/.claude/plugins/**)",
+      "Read(//home/ubuntu/.claude/plugins/supabase/**)",
+      "Read(//home/ubuntu/.claude/**)",
+      "mcp__plugin_supabase_supabase__list_migrations",
+      "mcp__plugin_supabase_supabase__list_tables",
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "mcp__plugin_supabase_supabase__get_project_url",
+      "mcp__plugin_supabase_supabase__get_publishable_keys",
+      "Bash(npm install:*)",
+      "Bash(npx turbo:*)",
+      "WebFetch(domain:shadcnstudio.com)",
+      "Read(//mnt/d/**)",
+      "Read(//mnt/c/Users/**)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

@@ -19,6 +19,34 @@ export interface TenantSettings {
     logo_url?: string;
   };
   opening_hours?: Record<string, unknown>;
+  homepage?: {
+    title?: string;
+    subtitle?: string;
+    hero_image_url?: string;
+    cta_text?: string;
+  };
+  about?: {
+    description?: string;
+  };
+  gallery?: {
+    images?: { url: string; caption?: string }[];
+  };
+  contact?: {
+    email?: string;
+    phone?: string;
+    address?: string;
+    map_embed_url?: string;
+  };
+  social?: {
+    instagram?: string;
+    facebook?: string;
+    tiktok?: string;
+  };
+}
+
+export interface PortfolioImage {
+  url: string;
+  caption?: string;
 }
 
 export interface Specialist {
@@ -30,6 +58,7 @@ export interface Specialist {
   display_order: number;
   is_active: boolean;
   slots_generated_through: string | null;
+  portfolio_images: PortfolioImage[] | null;
   created_at: string;
 }
 
@@ -95,4 +124,15 @@ export interface TenantMember {
   tenant_id: string;
   user_id: string;
   role: "admin" | "staff";
+}
+
+export interface Review {
+  id: string;
+  tenant_id: string;
+  specialist_id: string | null;
+  author_name: string;
+  rating: number;
+  text: string | null;
+  is_approved: boolean;
+  created_at: string;
 }

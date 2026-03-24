@@ -66,6 +66,20 @@
   - Sent after successful registration
   - Contains: shop URL, admin dashboard link, getting started checklist (add specialists, add services, set schedule)
 
+### 8.2b Custom Domain Support
+
+**Status:** `[ ]` Not started
+**Dependencies:** 8.2.1
+**Blockers:** None
+
+- [ ] **8.2b.1** Add `custom_domain` column to `tenants` table (text, nullable, unique)
+- [ ] **8.2b.2** Update middleware to resolve tenants by custom domain as fallback
+  - If no subdomain match: check `tenants.custom_domain` against full hostname
+- [ ] **8.2b.3** Admin setting to configure custom domain
+  - Input field in tenant settings, DNS instructions displayed
+- [ ] **8.2b.4** Vercel domain configuration per tenant (manual for now, API in Phase 4)
+- [ ] **8.2b.5** Pricing tier: subdomain (base fee) vs custom domain (premium)
+
 ### 8.3 Onboarding Wizard (First-Run Admin Experience)
 
 **Status:** `[ ]` Not started

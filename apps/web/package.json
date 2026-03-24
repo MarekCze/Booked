@@ -9,12 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clipbook/shared": "*",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "framer-motion": "^12.38.0",
     "next": "^14.2.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@clipbook/shared": "*"
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@types/node": "^20",
