@@ -38,3 +38,11 @@ export async function requireTenant(): Promise<TenantContext> {
   }
   return tenant;
 }
+
+/**
+ * Check if the current request is on the marketing site (no tenant subdomain).
+ */
+export async function isMarketingSite(): Promise<boolean> {
+  const headersList = await headers();
+  return headersList.get("x-is-marketing") === "true";
+}

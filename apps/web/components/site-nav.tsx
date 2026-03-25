@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTenant } from "@/lib/tenant-context";
+import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -15,6 +16,14 @@ const navLinks = [
 export function SiteNav() {
   const tenant = useTenant();
   const [open, setOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAuthenticated(!!user && !user.is_anonymous);
+    });
+  }, []);
 
   return (
     <nav className="border-b border-gray-100 bg-white">
@@ -35,6 +44,14 @@ export function SiteNav() {
               {link.label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <Link
+              href="/account"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              My Bookings
+            </Link>
+          )}
           <Link
             href="/book"
             className="rounded-lg bg-[var(--brand-primary,#0074c5)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
@@ -72,6 +89,15 @@ export function SiteNav() {
               {link.label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <Link
+              href="/account"
+              onClick={() => setOpen(false)}
+              className="block py-2 text-sm text-gray-600 hover:text-gray-900"
+            >
+              My Bookings
+            </Link>
+          )}
           <Link
             href="/book"
             onClick={() => setOpen(false)}

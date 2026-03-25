@@ -70,6 +70,57 @@ serve(async (req) => {
         }
 
         console.log(`Booking confirmed: ${bookingId}`);
+
+        // Send booking confirmation SMS (fire and forget)
+        if (clientPhone) {
+          const { data: tenant } = await supabase
+            .from("tenants")
+            .select("name, slug")
+            .eq("id", tenantId)
+            .single();
+
+          const { data: specialist } = await supabase
+            .from("specialists")
+            .select("name")
+            .eq("id", specialistId)
+            .single();
+
+          const { data: service } = await supabase
+            .from("services")
+            .select("name")
+            .eq("id", serviceId)
+            .single();
+
+          if (tenant && specialist && service) {
+            // Get booking time from the first slot
+            const { data: firstSlot } = await supabase
+              .from("slots")
+              .select("starts_at")
+              .eq("booking_id", bookingId)
+              .order("starts_at")
+              .limit(1)
+              .single();
+
+            const bookingTime = firstSlot
+              ? new Date(firstSlot.starts_at).toLocaleString("en-IE", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+              : "your appointment";
+
+            const smsBody = `Booking confirmed: ${service.name} with ${specialist.name} at ${tenant.name} on ${bookingTime}. To manage: https://${tenant.slug}.clipbook.io/account`;
+
+            supabase.functions
+              .invoke("send-sms", {
+                body: { to: clientPhone, body: smsBody },
+              })
+              .catch((err: Error) => console.error("SMS send failed:", err));
+          }
+        }
         break;
       }
 

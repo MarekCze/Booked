@@ -9,11 +9,13 @@ import {
 } from "@/lib/queries";
 import { SpecialistCarousel } from "@/components/specialist-carousel";
 import { ReviewCard } from "@/components/review-card";
+import { WelcomeBackCard } from "@/components/welcome-back-card";
+import { MarketingHome } from "@/components/marketing-home";
 import { formatPrice, formatDuration } from "@/lib/format";
 
 export default async function HomePage() {
   const tenant = await getTenant();
-  if (!tenant) return null;
+  if (!tenant) return <MarketingHome />;
 
   const [specialists, settings, services, reviews] = await Promise.all([
     getSpecialists(tenant.id),
@@ -59,6 +61,9 @@ export default async function HomePage() {
           {homepage?.cta_text || "Book Now"}
         </Link>
       </section>
+
+      {/* Welcome back card for returning clients */}
+      <WelcomeBackCard />
 
       {/* Specialists */}
       <section className="mx-auto max-w-5xl px-4 py-12">

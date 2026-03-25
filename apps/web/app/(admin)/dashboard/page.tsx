@@ -1,7 +1,8 @@
 import { requireTenant } from "@/lib/tenant";
 import { TodayBookings } from "@/components/admin/today-bookings";
+import { OnboardingChecklistWrapper } from "@/components/admin/onboarding-checklist-wrapper";
 import { Providers } from "@/components/providers";
-import { getSpecialists } from "@/lib/queries";
+import { getSpecialists, getTenantSettings, getAllServices } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 
 async function getTodayBookings(tenantId: string) {
@@ -48,12 +49,32 @@ async function getBookingStats(tenantId: string) {
   return { total, confirmed, revenue };
 }
 
+async function getOnboardingStatus(tenantId: string) {
+  const supabase = await createClient();
+  const [specialists, services, schedules, tenantData] = await Promise.all([
+    supabase.from("specialists").select("id").eq("tenant_id", tenantId).limit(1),
+    supabase.from("services").select("id").eq("tenant_id", tenantId).limit(1),
+    supabase.from("schedule_templates").select("id").eq("tenant_id", tenantId).limit(1),
+    supabase.from("tenants").select("stripe_account_id, settings, slug").eq("id", tenantId).single(),
+  ]);
+
+  return {
+    hasSpecialists: (specialists.data?.length ?? 0) > 0,
+    hasServices: (services.data?.length ?? 0) > 0,
+    hasSchedule: (schedules.data?.length ?? 0) > 0,
+    stripeConnected: !!tenantData.data?.stripe_account_id,
+    onboardingComplete: tenantData.data?.settings?.onboarding_complete === true,
+    slug: tenantData.data?.slug ?? "",
+  };
+}
+
 export default async function DashboardPage() {
   const tenant = await requireTenant();
-  const [bookings, specialists, stats] = await Promise.all([
+  const [bookings, specialists, stats, onboarding] = await Promise.all([
     getTodayBookings(tenant.id),
     getSpecialists(tenant.id),
     getBookingStats(tenant.id),
+    getOnboardingStatus(tenant.id),
   ]);
 
   // Build specialist name map
@@ -73,6 +94,19 @@ export default async function DashboardPage() {
             year: "numeric",
           })}
         </p>
+
+        {/* Onboarding checklist (shown for newly created shops) */}
+        {!onboarding.onboardingComplete && (
+          <div className="mt-6">
+            <OnboardingChecklistWrapper
+              hasSpecialists={onboarding.hasSpecialists}
+              hasServices={onboarding.hasServices}
+              hasSchedule={onboarding.hasSchedule}
+              stripeConnected={onboarding.stripeConnected}
+              tenantSlug={onboarding.slug}
+            />
+          </div>
+        )}
 
         {/* Stats bar */}
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
