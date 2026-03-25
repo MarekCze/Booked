@@ -3,9 +3,10 @@
 import { useState } from "react";
 import type { Specialist, Service } from "@clipbook/shared";
 import { useTenant } from "@/lib/tenant-context";
-import { formatTime, formatPrice, formatDuration } from "@/lib/format";
+import { formatDuration, formatPrice } from "@/lib/format";
 import { ServiceList } from "./service-list";
 import { AppointmentPicker } from "./appointment-picker";
+import { BookingConfirmation } from "./booking-confirmation";
 
 type Step = "service" | "datetime" | "confirm";
 
@@ -146,49 +147,17 @@ export function BookingFlow({
       )}
 
       {step === "confirm" && selectedService && selectedTime && (
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">
-            Booking Summary
-          </h3>
-          <dl className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Specialist</dt>
-              <dd className="font-medium text-gray-900">{specialist.name}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Service</dt>
-              <dd className="font-medium text-gray-900">
-                {selectedService.name}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Duration</dt>
-              <dd className="font-medium text-gray-900">
-                {formatDuration(selectedService.duration_min)}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Date & Time</dt>
-              <dd className="font-medium text-gray-900">
-                {new Date(selectedTime).toLocaleDateString("en-IE", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}{" "}
-                at {formatTime(selectedTime, tenant.timezone)}
-              </dd>
-            </div>
-            <div className="flex justify-between border-t border-gray-100 pt-3">
-              <dt className="font-medium text-gray-900">Total</dt>
-              <dd className="text-lg font-bold text-gray-900">
-                {formatPrice(selectedService.price_cents, tenant.currency)}
-              </dd>
-            </div>
-          </dl>
-          <p className="mt-6 text-center text-sm text-gray-400">
-            Payment integration coming in Week 3
-          </p>
-        </div>
+        <BookingConfirmation
+          specialist={specialist}
+          service={selectedService}
+          startsAt={selectedTime}
+          slotsNeeded={slotsNeeded}
+          onExpired={() => {
+            setSelectedTime(null);
+            setStep("datetime");
+          }}
+          onBack={handleBack}
+        />
       )}
     </div>
   );
