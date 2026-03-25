@@ -238,57 +238,57 @@
 
 ### 3.1 Slot Hold & Confirmation Flow
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 2.3.2, 1.4.2
 **Blockers:** None
 
-- [ ] **3.1.1** Create `components/booking-confirmation.tsx`
+- [x] **3.1.1** Create `components/booking-confirmation.tsx`
   - Shows summary: specialist name, service name, date/time, duration, price
   - Form fields: client name (text), client phone (tel input with Irish +353 default)
   - "Confirm & Pay" button
-- [ ] **3.1.2** On "Confirm & Pay" click:
+- [x] **3.1.2** On "Confirm & Pay" click:
   - Call `hold_slots()` RPC with specialist_id, starts_at, slot_count
   - If success: proceed to Stripe Checkout
   - If failure (slots taken): show error toast, re-query available times
-- [ ] **3.1.3** Add 5-minute countdown timer visible to user after successful hold
+- [x] **3.1.3** Add 5-minute countdown timer visible to user after successful hold
   - Display "Slot reserved for 4:32" countdown
   - On expiry: show "Reservation expired" message, prompt to re-select
 
 ### 3.2 Stripe Connect Onboarding (Tenant Setup)
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 1.2.1
 **Blockers:** Stripe account required (platform account)
 
-- [ ] **3.2.1** Create Stripe platform account, enable Connect Standard
-- [ ] **3.2.2** Create Supabase Edge Function: `supabase/functions/stripe-connect-onboard/index.ts`
-- [ ] **3.2.3** Create Supabase Edge Function: `supabase/functions/stripe-connect-return/index.ts`
-- [ ] **3.2.4** Add environment variables to Supabase: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
-- [ ] **3.2.5** Test onboarding flow end-to-end with Stripe test mode
+- [x] **3.2.1** Create Stripe platform account, enable Connect Standard
+- [x] **3.2.2** Create Supabase Edge Function: `supabase/functions/stripe-connect-onboard/index.ts`
+- [x] **3.2.3** Create Supabase Edge Function: `supabase/functions/stripe-connect-return/index.ts`
+- [x] **3.2.4** Add environment variables to Supabase: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- [x] **3.2.5** Test onboarding flow end-to-end with Stripe test mode
 
 ### 3.3 Stripe Checkout Session
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 3.1.2, 3.2.5
 **Blockers:** Stripe Connect must be working (3.2.5)
 
-- [ ] **3.3.1** Create Supabase Edge Function: `supabase/functions/create-checkout/index.ts`
-- [ ] **3.3.2** Redirect client to Stripe Checkout URL after successful hold
-- [ ] **3.3.3** Create success page: `app/(client)/book/success/page.tsx`
-- [ ] **3.3.4** Create cancel/back page: `app/(client)/book/cancelled/page.tsx`
+- [x] **3.3.1** Create Supabase Edge Function: `supabase/functions/create-checkout/index.ts`
+- [x] **3.3.2** Redirect client to Stripe Checkout URL after successful hold
+- [x] **3.3.3** Create success page: `app/(client)/book/success/page.tsx`
+- [x] **3.3.4** Create cancel/back page: `app/(client)/book/cancelled/page.tsx`
 
 ### 3.4 Stripe Webhook Handler
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 3.3.1, 1.4.3
 **Blockers:** None
 
-- [ ] **3.4.1** Create Supabase Edge Function: `supabase/functions/stripe-webhook/index.ts`
-- [ ] **3.4.2** Handle `checkout.session.completed` event
-- [ ] **3.4.3** Handle `payment_intent.payment_failed` event
-- [ ] **3.4.4** Handle `account.updated` event
-- [ ] **3.4.5** Register webhook endpoint in Stripe dashboard
-- [ ] **3.4.6** Test full payment flow end-to-end with Stripe test cards
+- [x] **3.4.1** Create Supabase Edge Function: `supabase/functions/stripe-webhook/index.ts`
+- [x] **3.4.2** Handle `checkout.session.completed` event
+- [x] **3.4.3** Handle `payment_intent.payment_failed` event
+- [x] **3.4.4** Handle `account.updated` event
+- [x] **3.4.5** Register webhook endpoint in Stripe dashboard
+- [x] **3.4.6** Test full payment flow end-to-end with Stripe test cards
 
 ---
 
@@ -296,32 +296,32 @@
 
 ### 4.1 Supabase Auth: Phone OTP & Anonymous
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 1.1.3
 **Blockers:** Supabase project must have phone auth provider enabled
 
-- [ ] **4.1.1** Enable phone OTP provider in Supabase dashboard
-- [ ] **4.1.2** Create `components/auth-modal.tsx`
-- [ ] **4.1.3** Enable anonymous auth in Supabase dashboard
-- [ ] **4.1.4** Implement guest booking flow
-- [ ] **4.1.5** Implement identity linking (anonymous → phone OTP)
-- [ ] **4.1.6** Add Google social login
+- [x] **4.1.1** Enable phone OTP provider in Supabase dashboard
+- [x] **4.1.2** Create `components/auth-modal.tsx`
+- [x] **4.1.3** Enable anonymous auth in Supabase dashboard
+- [x] **4.1.4** Implement guest booking flow
+- [x] **4.1.5** Implement identity linking (anonymous → phone OTP)
+- [x] **4.1.6** Add Google social login
 
 ### 4.2 Admin "Today View"
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 1.3.6, 1.3.8, 1.2.7
 **Blockers:** None
 
-- [ ] **4.2.1** Create `app/(admin)/dashboard/page.tsx`
-- [ ] **4.2.2** Create `components/admin/today-bookings.tsx`
-- [ ] **4.2.3** Add action buttons: Mark Complete, No Show, Cancel
-- [ ] **4.2.4** Add Supabase Realtime subscription on bookings
-- [ ] **4.2.5** Add stats bar: total bookings, revenue, next upcoming
+- [x] **4.2.1** Create `app/(admin)/dashboard/page.tsx`
+- [x] **4.2.2** Create `components/admin/today-bookings.tsx`
+- [x] **4.2.3** Add action buttons: Mark Complete, No Show, Cancel
+- [x] **4.2.4** Add Supabase Realtime subscription on bookings
+- [x] **4.2.5** Add stats bar: total bookings, revenue, next upcoming
 
 ### 4.3 Deployment
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` In progress (code ready, deployment pending)
 **Dependencies:** All above tasks
 **Blockers:** Domain name registered, DNS access
 
@@ -330,7 +330,7 @@
 - [ ] **4.3.3** Configure Supabase production environment
 - [ ] **4.3.4** Create first real tenant in production
 - [ ] **4.3.5** Smoke test full flow on production
-- [ ] **4.3.6** Set up pg_cron job for held-slot expiry cleanup
+- [x] **4.3.6** Set up pg_cron job for held-slot expiry cleanup
 
 ---
 
@@ -341,5 +341,5 @@
 | 1 | Schema, RLS, RPC functions, seed data, middleware | **Complete** |
 | 2 | Specialist cards, service picker, appointment picker (monthly calendar + time slots) | **Complete** |
 | 2.5 | Full salon website template (home, about, gallery, contact, reviews, specialist profiles) | **Complete** |
-| 3 | Slot hold, Stripe Connect, Checkout, webhooks | Not started |
-| 4 | Auth (OTP + anonymous + social), admin today view, deploy | Not started |
+| 3 | Slot hold, Stripe Connect, Checkout, webhooks | **Complete** |
+| 4 | Auth (OTP + anonymous + social), admin today view, deploy | **Complete** (deployment pending) |
