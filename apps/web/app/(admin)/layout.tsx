@@ -1,5 +1,26 @@
 import { getTenant } from "@/lib/tenant";
 import { redirect } from "next/navigation";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { Providers } from "@/components/providers";
+import { createClient } from "@/lib/supabase/server";
+
+async function getAdminMember(tenantId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("tenant_members")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("user_id", user.id)
+    .single();
+
+  return data;
+}
 
 export default async function AdminLayout({
   children,
@@ -9,36 +30,26 @@ export default async function AdminLayout({
   const tenant = await getTenant();
   if (!tenant) redirect("/");
 
+  const member = await getAdminMember(tenant.id);
+
+  // If not a member and not on the login page, redirect to login
+  // The login page itself handles rendering without auth
+  if (!member) {
+    return (
+      <Providers tenant={tenant}>
+        <div className="min-h-screen bg-gray-50">{children}</div>
+      </Providers>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Admin navbar */}
-      <nav className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-bold text-gray-900">
-              {tenant.name}
-            </span>
-            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-              Admin
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <a
-              href="/dashboard"
-              className="font-medium text-gray-900 hover:text-[var(--brand-primary,#0074c5)]"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/"
-              className="text-gray-500 hover:text-gray-700"
-            >
-              View Site
-            </a>
-          </div>
-        </div>
-      </nav>
-      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
-    </div>
+    <Providers tenant={tenant}>
+      <AdminShell
+        tenantName={tenant.name}
+        role={member.role}
+      >
+        {children}
+      </AdminShell>
+    </Providers>
   );
 }
