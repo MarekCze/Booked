@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-// Domains that should skip tenant resolution
-const SKIP_SUBDOMAINS = new Set(["www", "app", ""]);
+// Subdomains that serve the marketing site (no tenant resolution)
+const MARKETING_SUBDOMAINS = new Set(["www", "app", ""]);
 
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
@@ -13,9 +13,14 @@ export async function middleware(request: NextRequest) {
   const parts = hostname.split(".");
   const subdomain = parts.length > 1 ? parts[0] : "";
 
-  // Skip tenant resolution for non-tenant subdomains
-  if (SKIP_SUBDOMAINS.has(subdomain)) {
-    return NextResponse.next();
+  // Marketing site: no subdomain, www, or app → skip tenant resolution
+  if (MARKETING_SUBDOMAINS.has(subdomain)) {
+    // Mark as marketing context so layouts can differentiate
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-is-marketing", "true");
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
   // Create Supabase client for tenant lookup
@@ -37,14 +42,27 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Look up tenant by slug
-  const { data: tenant, error } = await supabase
+  // Look up tenant by slug first
+  let tenant = null;
+  const { data: slugMatch } = await supabase
     .from("tenants")
     .select("id, slug, name, timezone, currency, settings")
     .eq("slug", subdomain)
     .single();
 
-  if (error || !tenant) {
+  tenant = slugMatch;
+
+  // Fallback: check custom_domain against full hostname
+  if (!tenant) {
+    const { data: domainMatch } = await supabase
+      .from("tenants")
+      .select("id, slug, name, timezone, currency, settings")
+      .eq("custom_domain", hostname)
+      .single();
+    tenant = domainMatch;
+  }
+
+  if (!tenant) {
     // Tenant not found — show 404
     const url = request.nextUrl.clone();
     url.pathname = "/not-found";

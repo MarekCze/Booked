@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import type { Specialist } from "@clipbook/shared";
 import { Badge } from "@/components/ui/badge";
+import { FavouriteButton } from "@/components/favourite-button";
 import { formatTime } from "@/lib/format";
 import { useTenant } from "@/lib/tenant-context";
 
@@ -53,8 +54,11 @@ export function SpecialistCard({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onSelect(specialist.id)}
-      className="flex flex-col items-start rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md w-full"
+      className="relative flex flex-col items-start rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md w-full"
     >
+      {/* Favourite toggle */}
+      <FavouriteButton specialistId={specialist.id} />
+
       {/* Avatar */}
       <div
         className={`flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold text-white ${getAvatarColor(specialist.name)}`}

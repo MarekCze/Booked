@@ -8,12 +8,14 @@ export interface Tenant {
   timezone: string;
   currency: string;
   stripe_account_id: string | null;
+  custom_domain: string | null;
   settings: TenantSettings;
   created_at: string;
 }
 
 export interface TenantSettings {
   slot_granularity_min?: number; // default 15
+  onboarding_complete?: boolean;
   branding?: {
     primary_color?: string;
     logo_url?: string;
@@ -105,6 +107,16 @@ export interface Booking {
   stripe_payment_intent_id: string | null;
   price_cents: number;
   notes: string | null;
+  reminder_sent: boolean;
+  reminder_1h_sent: boolean;
+  auto_no_show: boolean;
+  created_at: string;
+}
+
+export interface Favourite {
+  id: string;
+  client_id: string;
+  specialist_id: string;
   created_at: string;
 }
 

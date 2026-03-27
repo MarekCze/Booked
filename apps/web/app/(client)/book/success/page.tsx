@@ -1,6 +1,49 @@
 import { getTenant } from "@/lib/tenant";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+
+type BookingSummary = {
+  id: string;
+  specialist_id: string;
+  service_id: string;
+  specialists: { name: string } | null;
+  services: { name: string } | null;
+};
+
+async function getBookingDetails(
+  bookingId: string | undefined,
+  tenantId: string
+): Promise<BookingSummary | null> {
+  const supabase = await createClient();
+
+  // If we have a booking ID, look it up directly
+  if (bookingId) {
+    const { data } = await supabase
+      .from("bookings")
+      .select("id, specialist_id, service_id, specialists(name), services(name)")
+      .eq("id", bookingId)
+      .single();
+    return data as BookingSummary | null;
+  }
+
+  // Otherwise, find the most recent booking at this tenant for the current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("bookings")
+    .select("id, specialist_id, service_id, specialists(name), services(name)")
+    .eq("tenant_id", tenantId)
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  return data as BookingSummary | null;
+}
 
 export default async function BookingSuccessPage({
   searchParams,
@@ -12,6 +55,7 @@ export default async function BookingSuccessPage({
 
   const params = await searchParams;
   const isInShop = params.mode === "in_shop";
+  const booking = await getBookingDetails(params.booking, tenant.id);
 
   return (
     <div className="mx-auto max-w-lg px-4 py-20 text-center">
@@ -40,12 +84,36 @@ export default async function BookingSuccessPage({
       </p>
 
       <div className="mt-8 space-y-3">
+        {/* Book Again — pre-fill specialist + service */}
+        {booking && (
+          <Link
+            href={`/book?specialist=${booking.specialist_id}&service=${booking.service_id}`}
+            className="block rounded-lg bg-[var(--brand-primary,#0074c5)] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90"
+          >
+            Book Again with {booking.specialists?.name || "Same Specialist"}
+          </Link>
+        )}
+
         <Link
           href="/"
-          className="block rounded-lg bg-[var(--brand-primary,#0074c5)] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90"
+          className={`block rounded-lg px-6 py-2.5 text-sm font-medium ${
+            booking
+              ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
+              : "bg-[var(--brand-primary,#0074c5)] text-white hover:opacity-90"
+          }`}
         >
           Back to {tenant.name}
         </Link>
+
+        {/* Cancel booking link */}
+        {booking && (
+          <Link
+            href={`/book/cancel?booking=${booking.id}`}
+            className="block text-sm text-gray-400 hover:text-red-600"
+          >
+            Need to cancel?
+          </Link>
+        )}
       </div>
     </div>
   );

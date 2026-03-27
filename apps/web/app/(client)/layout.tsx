@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTenant } from "@/lib/tenant";
 import { getTenantSettings } from "@/lib/queries";
 import { Providers } from "@/components/providers";
@@ -11,18 +12,48 @@ export default async function ClientLayout({
 }) {
   const tenant = await getTenant();
 
-  // No tenant context (bare domain / marketing site) — render minimal shell
+  // No tenant context — render marketing shell
   if (!tenant) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-8">
-        <h1 className="text-4xl font-bold">ClipBook</h1>
-        <p className="mt-4 text-lg text-gray-600">
-          Booking engine for barbers, hair &amp; beauty salons
-        </p>
-        <p className="mt-2 text-sm text-gray-400">
-          Visit your shop&apos;s subdomain to book an appointment.
-        </p>
-      </main>
+      <div className="flex min-h-screen flex-col">
+        {/* Marketing Nav */}
+        <nav className="border-b border-gray-100 bg-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+            <Link href="/" className="text-xl font-bold text-gray-900">
+              ClipBook
+            </Link>
+            <div className="flex items-center gap-6">
+              <Link
+                href="/pricing"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/owner-login"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+              >
+                Sign Up Your Shop
+              </Link>
+            </div>
+          </div>
+        </nav>
+
+        <main className="flex-1">{children}</main>
+
+        {/* Marketing Footer */}
+        <footer className="border-t border-gray-100 bg-gray-50 px-4 py-8">
+          <div className="mx-auto max-w-6xl text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} ClipBook. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
     );
   }
 
