@@ -62,6 +62,40 @@ serve(async (req) => {
         );
 
         if (bookingError) {
+          // 7.2.3: If slots were released by cron but taken by someone else, refund
+          if (
+            bookingError.message &&
+            bookingError.message.includes("SLOTS_UNAVAILABLE")
+          ) {
+            console.error(
+              "Slots no longer available after hold expired — initiating refund:",
+              bookingError
+            );
+            if (paymentIntent) {
+              try {
+                const { data: tenantForRefund } = await supabase
+                  .from("tenants")
+                  .select("stripe_account_id")
+                  .eq("id", tenantId)
+                  .single();
+
+                await stripe.refunds.create(
+                  { payment_intent: paymentIntent },
+                  tenantForRefund?.stripe_account_id
+                    ? { stripeAccount: tenantForRefund.stripe_account_id }
+                    : undefined
+                );
+                console.log(`Auto-refunded payment ${paymentIntent} — slots were taken`);
+              } catch (refundErr) {
+                console.error("Auto-refund failed:", refundErr);
+              }
+            }
+            return new Response(
+              JSON.stringify({ error: "Slots unavailable, refund initiated" }),
+              { status: 200 }
+            );
+          }
+
           console.error("Failed to confirm booking:", bookingError);
           return new Response(
             JSON.stringify({ error: "Failed to confirm booking" }),
@@ -119,6 +153,40 @@ serve(async (req) => {
                 body: { to: clientPhone, body: smsBody },
               })
               .catch((err: Error) => console.error("SMS send failed:", err));
+
+            // 7.3.3: Send confirmation email if client has email
+            const clientEmail = session.customer_details?.email || null;
+            if (clientEmail) {
+              const cancelUrl = `https://${tenant.slug}.clipbook.io/book/cancel?booking=${bookingId}`;
+              const emailHtml = `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+                  <h2 style="color: #111;">Booking Confirmed</h2>
+                  <p>Hi ${clientName || "there"},</p>
+                  <p>Your booking has been confirmed:</p>
+                  <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                    <tr><td style="padding: 8px 0; color: #666;">Service</td><td style="padding: 8px 0; font-weight: 600;">${service.name}</td></tr>
+                    <tr><td style="padding: 8px 0; color: #666;">Specialist</td><td style="padding: 8px 0; font-weight: 600;">${specialist.name}</td></tr>
+                    <tr><td style="padding: 8px 0; color: #666;">Date & Time</td><td style="padding: 8px 0; font-weight: 600;">${bookingTime}</td></tr>
+                    <tr><td style="padding: 8px 0; color: #666;">Amount</td><td style="padding: 8px 0; font-weight: 600;">${(priceCents / 100).toFixed(2)}</td></tr>
+                  </table>
+                  <p>We look forward to seeing you!</p>
+                  <p style="margin-top: 24px; font-size: 13px; color: #999;">
+                    Need to cancel? <a href="${cancelUrl}" style="color: #0074c5;">Cancel booking</a>
+                  </p>
+                  <hr style="margin-top: 24px; border: none; border-top: 1px solid #eee;" />
+                  <p style="font-size: 12px; color: #aaa;">${tenant.name} — Powered by ClipBook</p>
+                </div>
+              `;
+              supabase.functions
+                .invoke("send-email", {
+                  body: {
+                    to: clientEmail,
+                    subject: `Booking Confirmed — ${service.name} at ${tenant.name}`,
+                    html: emailHtml,
+                  },
+                })
+                .catch((err: Error) => console.error("Email send failed:", err));
+            }
           }
         }
         break;

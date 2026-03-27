@@ -74,6 +74,13 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
     settings.about?.description ?? ""
   );
 
+  // Gallery
+  const [galleryImages, setGalleryImages] = useState<
+    { url: string; caption?: string }[]
+  >(settings.gallery?.images ?? []);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+
   // Contact
   const [contactEmail, setContactEmail] = useState(
     settings.contact?.email ?? ""
@@ -146,6 +153,9 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
       },
       about: {
         description: aboutDesc || undefined,
+      },
+      gallery: {
+        images: galleryImages.length > 0 ? galleryImages : undefined,
       },
       contact: {
         email: contactEmail || undefined,
@@ -454,6 +464,83 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             placeholder="Tell clients about your shop..."
           />
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section>
+        <h2 className="text-lg font-semibold text-gray-900">Gallery</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Upload images to display on your shop&apos;s gallery page.
+        </p>
+        <div className="mt-4 space-y-4">
+          {galleryImages.length > 0 && (
+            <div className="grid grid-cols-3 gap-3">
+              {galleryImages.map((img, idx) => (
+                <div key={idx} className="group relative">
+                  <img
+                    src={img.url}
+                    alt={img.caption || `Gallery image ${idx + 1}`}
+                    className="h-28 w-full rounded-lg object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGalleryImages((prev) =>
+                        prev.filter((_, i) => i !== idx)
+                      )
+                    }
+                    className="absolute right-1 top-1 hidden rounded-full bg-red-600 p-1 text-white group-hover:block"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    value={img.caption ?? ""}
+                    onChange={(e) =>
+                      setGalleryImages((prev) =>
+                        prev.map((g, i) =>
+                          i === idx ? { ...g, caption: e.target.value } : g
+                        )
+                      )
+                    }
+                    placeholder="Caption"
+                    className="mt-1 block w-full rounded border border-gray-200 px-2 py-1 text-xs"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={async (e) => {
+              const files = e.target.files;
+              if (!files) return;
+              setGalleryUploading(true);
+              const newImages: { url: string; caption?: string }[] = [];
+              for (const file of Array.from(files)) {
+                const url = await uploadImage(file, "gallery");
+                if (url) newImages.push({ url });
+              }
+              setGalleryImages((prev) => [...prev, ...newImages]);
+              setGalleryUploading(false);
+              if (galleryInputRef.current) galleryInputRef.current.value = "";
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            disabled={galleryUploading || uploading}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            {galleryUploading ? "Uploading..." : "Add Images"}
+          </button>
         </div>
       </section>
 
