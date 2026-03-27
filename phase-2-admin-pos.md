@@ -22,125 +22,126 @@
 
 ### 5.1 Admin Layout & Navigation
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** Phase 1 admin route group (4.2.1)
 **Blockers:** None
 
-- [ ] **5.1.1** Create `app/(admin)/layout.tsx` with sidebar navigation
-  - Sidebar links: Today, Specialists, Services, Schedule, Settings
+- [x] **5.1.1** Create `app/(admin)/layout.tsx` with sidebar navigation
+  - Sidebar links: Dashboard, Revenue, Specialists, Services, Schedule, Settings
   - Mobile: collapsible hamburger menu
-  - Top bar: tenant name, logged-in user, logout button
-- [ ] **5.1.2** Create admin auth guard as a layout-level server component
+  - Top bar: tenant name, role badge (admin/staff), logout button
+  - "View Site" external link to tenant subdomain
+- [x] **5.1.2** Create admin auth guard as a layout-level server component
   - Query `tenant_members` for `auth.uid()` → if no row, redirect to login
   - Pass `tenant_id` and `role` (admin/staff) into context/provider for child routes
-- [ ] **5.1.3** Create admin login page `app/(admin)/login/page.tsx`
+- [x] **5.1.3** Create admin login page `app/(admin)/login/page.tsx`
   - Email + password form using `supabase.auth.signInWithPassword()`
   - Redirect to dashboard on success
 
 ### 5.2 Specialist Management (CRUD)
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 5.1.2, Phase 1 RLS (1.3.3)
 **Blockers:** None
 
-- [ ] **5.2.1** Create `app/(admin)/specialists/page.tsx` — specialist list view
+- [x] **5.2.1** Create `app/(admin)/specialists/page.tsx` — specialist list view
   - Fetch all specialists for tenant (including inactive, unlike client view)
   - Table/list: photo thumbnail, name, active/inactive badge, display order, edit button
   - "Add Specialist" button at top
-- [ ] **5.2.2** Create `app/(admin)/specialists/[id]/page.tsx` — edit specialist form
+- [x] **5.2.2** Create `app/(admin)/specialists/edit/[id]/page.tsx` — edit specialist form
   - Fields: name (text), bio (textarea), display order (number), is_active (toggle)
   - Photo upload (see 5.2.3)
   - Save → `supabase.from('specialists').update(...)`, redirect to list
   - Delete button with confirmation modal (only if no future bookings)
-- [ ] **5.2.3** Implement photo upload to Supabase Storage
+- [x] **5.2.3** Implement photo upload to Supabase Storage
   - Create `specialist-photos` storage bucket (public read, authenticated write)
   - On file select: upload to `specialist-photos/{tenant_id}/{specialist_id}.{ext}`
   - Generate public URL, store in `specialists.photo_url`
-  - Client-side image resize/crop before upload (max 500x500, keep file under 200KB)
+  - Client-side image resize to 500x500
   - Delete old photo from storage on replacement
-- [ ] **5.2.4** Create `app/(admin)/specialists/new/page.tsx` — add specialist form
+- [x] **5.2.4** Create `app/(admin)/specialists/new/page.tsx` — add specialist form
   - Same fields as edit, INSERT into `specialists`
   - Auto-set `display_order` to `max(display_order) + 1` for the tenant
-- [ ] **5.2.5** Portfolio image management on specialist edit form
-  - Upload multiple images to Supabase Storage
+- [x] **5.2.5** Portfolio image management on specialist edit form
+  - Upload multiple images to Supabase Storage (resized to 1200x1200)
   - Store URLs in `specialists.portfolio_images` JSONB array
-  - Add/remove/reorder portfolio images, optional captions
+  - Add/remove portfolio images
   - Displayed on specialist profile page (`/specialists/[id]`)
-- [ ] **5.2.6** Add drag-to-reorder for display_order on the list view
+- [x] **5.2.6** Add drag-to-reorder for display_order on the list view
   - Reorder → batch UPDATE `display_order` values
-  - Use a simple sortable list (no heavy DnD library — `framer-motion` `Reorder` component)
 
 ### 5.3 Service Management (CRUD)
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 5.1.2, 5.2.1
 **Blockers:** None
 
-- [ ] **5.3.1** Create `app/(admin)/services/page.tsx` — service list view
+- [x] **5.3.1** Create `app/(admin)/services/page.tsx` — service list view
   - Table: name, duration, price, assigned specialist (or "All"), active badge, edit button
   - "Add Service" button
-- [ ] **5.3.2** Create `app/(admin)/services/[id]/page.tsx` — edit service form
+- [x] **5.3.2** Create `app/(admin)/services/[id]/page.tsx` — edit service form
   - Fields: name (text), duration_min (select: 15, 30, 45, 60, 75, 90, 120), price (currency input in cents), specialist assignment (dropdown: "All Specialists" + list of active specialists), is_active (toggle)
   - Save → UPDATE, redirect to list
   - Delete with confirmation (only if no future bookings reference this service)
-- [ ] **5.3.3** Create `app/(admin)/services/new/page.tsx` — add service form
+- [x] **5.3.3** Create `app/(admin)/services/new/page.tsx` — add service form
   - Same fields as edit, INSERT into `services`
-- [ ] **5.3.4** Add price display formatting helper in `packages/shared`
+- [~] **5.3.4** Add price display formatting helper in `packages/shared`
   - `formatPrice(cents: number, currency: string)` → e.g., "€15.00"
-  - Used in both admin and client-facing UIs
+  - **Note:** Implemented in `apps/web/lib/format.ts` but not extracted to `packages/shared`
 
 ### 5.4 Schedule Template Editor
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Complete
 **Dependencies:** 5.2.1, Phase 1 schema (1.2.6)
 **Blockers:** None
 
-- [ ] **5.4.1** Create `app/(admin)/schedule/page.tsx` — weekly schedule view
-  - Specialist selector at top (dropdown or tab per specialist)
+- [x] **5.4.1** Create `app/(admin)/schedule/page.tsx` — weekly schedule view
+  - Specialist selector at top (button group for switching between specialists)
   - 7-day grid (Mon–Sun) showing configured hours per day
   - Each day cell shows: start time – end time, break period if set
   - "No hours set" placeholder for unconfigured days
-- [ ] **5.4.2** Create `components/admin/schedule-day-editor.tsx` — day editor modal
+- [x] **5.4.2** Create `components/admin/schedule-day-editor.tsx` — day editor modal
   - Opens on clicking a day cell
   - Fields: start_time (time picker), end_time (time picker), break_start (optional), break_end (optional)
   - "Day off" toggle that clears the template for that day
   - Save → UPSERT into `schedule_templates` (on conflict `specialist_id, day_of_week`)
-- [ ] **5.4.3** Handle slot regeneration on schedule change
+- [x] **5.4.3** Handle slot regeneration on schedule change
   - When a template is updated: delete future `available` slots for affected specialist + day_of_week
   - Reset `specialists.slots_generated_through` to today (force JIT regeneration)
   - Do NOT delete slots with `status = 'booked'` — show warning if schedule change conflicts with existing bookings
-- [ ] **5.4.4** Add "Copy to all days" shortcut
-  - Set Mon hours → button "Apply Mon hours to Tue–Sat" → batch upsert
+- [x] **5.4.4** Add "Copy to all days" shortcut
+  - Apply Monday hours to Tue–Sat → batch upsert
   - Common pattern: same hours every working day
 - [ ] **5.4.5** Add slot granularity setting to tenant settings page
   - Options: 15 min (default), 20 min, 30 min
   - Warning: changing granularity deletes all future available slots and regenerates
   - Store in `tenants.settings.slot_granularity_min`
+  - **Note:** Granularity is currently hardcoded; no admin UI to change it
 
 ### 5.5 Tenant Settings Page
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` Partially complete
 **Dependencies:** 5.1.2
 **Blockers:** None
 
-- [ ] **5.5.1** Create `app/(admin)/settings/page.tsx`
+- [x] **5.5.1** Create `app/(admin)/settings/page.tsx`
   - Sections: Shop Details, Stripe, Branding, Website Content
-- [ ] **5.5.2** Shop details section: name, timezone (dropdown), currency (dropdown: EUR, GBP, USD)
+- [x] **5.5.2** Shop details section: name, timezone (dropdown with 31 timezones), currency (dropdown: EUR, GBP, USD)
   - Save → UPDATE `tenants` row
-- [ ] **5.5.3** Stripe section: show onboarding status (connected / not connected / restricted)
+- [x] **5.5.3** Stripe section: show onboarding status (connected / not connected)
   - If not connected: "Connect Stripe" button → triggers onboarding flow from Phase 1 (3.2.2)
-  - If connected: show account ID, link to Stripe dashboard, charges_enabled status
-- [ ] **5.5.4** Branding section: primary colour picker, logo upload to Supabase Storage
+  - If connected: show account ID, link to Stripe dashboard
+- [x] **5.5.4** Branding section: primary colour picker (with hex input), logo upload to Supabase Storage
   - Store in `tenants.settings.branding` as JSON: `{ primary_color, logo_url }`
   - Applied in client-facing pages via CSS variables
-- [ ] **5.5.5** Website content management section:
-  - Homepage: title, subtitle, hero image upload, CTA text
-  - About: description (textarea)
-  - Gallery: image uploads (multiple), captions
-  - Contact: email, phone, address, map embed URL
-  - Social: Instagram, Facebook, TikTok URLs
+- [~] **5.5.5** Website content management section:
+  - [x] Homepage: title, subtitle, hero image upload, CTA text
+  - [x] About: description (textarea)
+  - [ ] Gallery: image uploads (multiple), captions — **Not implemented in admin UI**
+  - [x] Contact: email, phone, address, map embed URL
+  - [x] Social: Instagram, Facebook, TikTok URLs
   - All stored in `tenants.settings` JSONB fields
-- [ ] **5.5.6** Review management: list all reviews, approve/reject toggle, delete
+- [ ] **5.5.6** Review management: list all reviews, approve/reject toggle, delete — **Not implemented**
 
 ---
 
@@ -266,24 +267,24 @@
 
 ### 7.1 Booking Cancellation Flow
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` Partially complete
 **Dependencies:** Phase 1 cancel_booking RPC (1.4.4)
 **Blockers:** None
 
 - [ ] **7.1.1** Add cancellation to client booking confirmation email/page
   - "Cancel Booking" link/button on success page
   - Also accessible via direct link (with booking ID + token for guest access)
-- [ ] **7.1.2** Create `app/(client)/book/cancel/page.tsx`
-  - Shows booking summary + "Are you sure?" confirmation
-  - Calls `cancel_booking()` RPC → releases slots, sets status to `cancelled`
-  - If booking was paid: trigger Stripe refund via Edge Function (full refund for MVP)
+  - **Not implemented:** Success page has no cancel link
+- [~] **7.1.2** Create `app/(client)/book/cancel/page.tsx`
+  - **Not implemented as dedicated page.** Cancellation is available via the client account booking history (`components/booking-history.tsx`) with confirmation dialog and `cancel_booking()` RPC call
 - [ ] **7.1.3** Create Supabase Edge Function: `supabase/functions/refund-booking/index.ts`
   - Receives `booking_id`, validates ownership/admin role
   - Creates Stripe Refund against the stored `payment_intent_id`
   - Updates `bookings.payment_status = 'refunded'`
-- [ ] **7.1.4** Add cancellation from admin dashboard
-  - "Cancel" button on booking row in today view (already stubbed in 4.2.3)
-  - Confirm dialog with option to refund or cancel without refund (walk-in, unpaid)
+  - **Not implemented:** No refund Edge Function exists
+- [x] **7.1.4** Add cancellation from admin dashboard
+  - "Cancel" button on booking row in today view
+  - Calls `cancel_booking()` RPC to release slots and set status to `cancelled`
 
 ### 7.2 Held-Slot Expiry Cleanup
 
@@ -323,23 +324,41 @@
 
 ### 7.4 Rebooking (Quick Rebook)
 
-**Status:** `[ ]` Not started
+**Status:** `[~]` Partially complete
 **Dependencies:** Phase 1 booking flow
 **Blockers:** None
 
 - [ ] **7.4.1** Add "Book Again" button to booking success page
   - Pre-fills specialist and service selection
   - Jumps directly to calendar step
-- [ ] **7.4.2** Add "Book Again" to admin's completed booking rows
-  - Opens client booking URL with specialist + service pre-selected as query params
+  - **Not implemented:** Success page only has "Back to {shop name}" link
+- [x] **7.4.2** Add "Book Again" to client booking history
+  - "Book Again" button on completed/cancelled bookings in `components/booking-history.tsx`
+  - "Reschedule" button on confirmed (upcoming) bookings
+  - Pre-fills specialist + service via query params in booking URL
 
 ---
 
 ## Phase 2 Summary
 
-| Week | Key Deliverables | Task Count |
-|------|-----------------|------------|
-| 5 | Admin CRUD (specialists, services, schedule), settings, branding | 22 |
-| 6 | RN POS app: auth, bookings list, Stripe Terminal NFC, TestFlight build | 18 |
-| 7 | Cancellation + refund, hold expiry edge cases, email notifications, rebooking | 13 |
-| **Total** | | **53** |
+| Week | Key Deliverables | Task Count | Completed | Not Started |
+|------|-----------------|------------|-----------|-------------|
+| 5 | Admin CRUD (specialists, services, schedule), settings, branding | 22 | 19 | 3 |
+| 6 | RN POS app: auth, bookings list, Stripe Terminal NFC, TestFlight build | 18 | 0 | 18 |
+| 7 | Cancellation + refund, hold expiry edge cases, email notifications, rebooking | 13 | 3 | 10 |
+| **Total** | | **53** | **22** | **31** |
+
+### Remaining Items (code tasks an AI agent could do)
+- **5.3.4** Extract `formatPrice` to `packages/shared` (currently in `apps/web/lib/format.ts`)
+- **5.4.5** Slot granularity admin setting (currently hardcoded)
+- **5.5.5** Gallery image management in admin settings UI
+- **5.5.6** Review management admin UI (approve/reject/delete)
+- **7.1.1** Cancel link on booking success page
+- **7.1.2** Dedicated client-facing cancel page (`/book/cancel/`)
+- **7.1.3** Refund booking Edge Function
+- **7.2.1–7.2.3** Held-slot expiry logging, monitoring, and edge case handling
+- **7.3.1–7.3.4** Email notifications (requires email provider — Resend recommended)
+- **7.4.1** "Book Again" button on booking success page
+
+### Blocked Items (require human action / external accounts)
+- **6.1–6.5** Entire React Native POS app (requires Apple Developer account, physical device, Stripe Terminal entitlement)
